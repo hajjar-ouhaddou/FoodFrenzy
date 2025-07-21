@@ -1,27 +1,28 @@
 pipeline {
-  agent any
+    agent any
 
-  tools {
-   maven 'maven'  // ou la version configurée dans Jenkins
-  }
-
-  stages {
-    stage('Checkout') {
-      steps {
-        git 'https://github.com/ton-utilisateur/foodfrenzy.git'
-      }
+    tools {
+        maven 'maven'
     }
 
-    stage('Build') {
-      steps {
-        sh 'mvn clean install -DskipTests'
-      }
-    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/hajjar-ouhaddou/FoodFrenzy.git',
+                    credentialsId: 'github-token'
+            }
+        }
 
-    stage('Test') {
-      steps {
-        sh 'mvn test'
-      }
+        stage('Build') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
     }
-  }
 }
