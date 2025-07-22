@@ -24,5 +24,13 @@ pipeline {
                 sh 'mvn test'
             }
         }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh 'mvn sonar:sonar -Dsonar.host.url=http://192.168.27.129:9000'
+                }
+            }
+        }
     }
 }
