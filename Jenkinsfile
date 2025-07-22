@@ -15,22 +15,31 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean install'
+                bat 'mvn clean install'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
-                    sh 'mvn sonar:sonar -Dsonar.host.url=http://192.168.27.129:9000'
+                    bat 'mvn sonar:sonar -Dsonar.host.url=http://192.168.27.129:9000'
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo '✔️ Build, tests, and SonarQube completed successfully.'
+        }
+        failure {
+            echo '❌ Build or analysis failed.'
         }
     }
 }
