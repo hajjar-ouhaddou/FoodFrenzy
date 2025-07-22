@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     tools {
-        maven 'maven' // Assure-toi que le Maven est bien configuré dans Jenkins (Manage Jenkins > Global Tool Configuration)
+        maven 'maven'
     }
 
     environment {
-        DOCKER_IMAGE = 'hajjarouhaddou/foodfrenzy' // Change ce nom si ton repo DockerHub est différent
+        DOCKER_IMAGE = 'hajjarouhaddou/foodfrenzy'
     }
 
     stages {
@@ -50,11 +50,11 @@ pipeline {
     }
 
     post {
-        failure {
-            echo '❌ Build or analysis failed.'
-        }
         success {
-            echo '✅ Build, test, analysis, and Docker push succeeded!'
+            echo '✅ Build, tests, SonarQube analysis, and Docker push completed successfully!'
+        }
+        failure {
+            echo '❌ Pipeline failed. Check logs above.'
         }
     }
 }
