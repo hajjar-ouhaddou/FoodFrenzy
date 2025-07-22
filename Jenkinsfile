@@ -2,18 +2,17 @@ pipeline {
     agent any
 
     tools {
-        maven 'maven' // doit correspondre au nom configuré dans Jenkins (tu l'as bien fait)
+        maven 'maven' // Assure-toi que le Maven est bien configuré dans Jenkins (Manage Jenkins > Global Tool Configuration)
     }
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-id')  // à configurer dans Jenkins (ID secret DockerHub)
+        DOCKER_IMAGE = 'hajjarouhaddou/foodfrenzy' // Change ce nom si ton repo DockerHub est différent
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/hajjar-ouhaddou/FoodFrenzy.git',
-                    credentialsId: 'github-token' // tu l'as déjà configuré
+                git url: 'https://github.com/hajjar-ouhaddou/FoodFrenzy.git', credentialsId: 'github-token'
             }
         }
 
@@ -37,40 +36,25 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t hajjarouhaddou/foodfrenzy-app .'
-            }
-        }
-
-        stage('Push to Docker Hub') {
+        stage('Docker Build & Push') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh '''
+                    sh """
                         echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin
-                        docker push hajjarouhaddou/foodfrenzy-app
-                    '''
+                        docker build -t $DOCKER_IMAGE .
+                        docker push $DOCKER_IMAGE
+                    """
                 }
-            }
-        }
-
-        stage('Deploy Locally') {
-            steps {
-                sh '''
-                    docker stop foodfrenzy || true
-                    docker rm foodfrenzy || true
-                    docker run -d --name foodfrenzy -p 8080:8080 hajjarouhaddou/foodfrenzy-app
-                '''
             }
         }
     }
 
     post {
         failure {
-            echo '❌ Échec du pipeline.'
+            echo '❌ Build or analysis failed.'
         }
         success {
-            echo '✅ Pipeline terminé avec succès.'
+            echo '✅ Build, test, analysis, and Docker push succeeded!'
         }
     }
 }
